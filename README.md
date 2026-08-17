@@ -20,7 +20,7 @@ implementation follows.
 
 ## Getting started
 
-> **Note — demo scope:** Part 2 is implemented as a happy-path flow for demonstration purposes, not a
+> **Note — demo scope:** Part 1 completed and Part 2 is implemented as a happy-path flow for demonstration purposes, not a
 > fully hardened production feature set. The actual system design and sprint plan requested by the brief
 > are documented separately in [`Task_2.pdf`](./Task_2.pdf).
 
