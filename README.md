@@ -20,6 +20,20 @@ implementation follows.
 
 ## Getting started
 
+> **Note — demo scope:** Part 2 is implemented as a happy-path flow for demonstration purposes, not a
+> fully hardened production feature set. The actual system design and sprint plan requested by the brief
+> are documented separately in [`Task_2.pdf`](./Task_2.pdf).
+
+> **Test environment:** a live deployment is available at
+> **[internal-task-portal.vercel.app](https://internal-task-portal.vercel.app)**, with a dedicated admin
+> account for testing:
+>
+> | Email | Password |
+> | --- | --- |
+> | `dilushijayathilaka@gmail.com` | `admin@123` |
+>
+> These credentials are for testing/demo purposes only.
+
 **1. Start PostgreSQL**
 
 ```bash
