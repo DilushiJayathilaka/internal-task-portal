@@ -1,26 +1,88 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-foreground: #ffffff;
+  --danger: #dc2626;
+
+  /* Deeper, richer navy than --accent - used for the sidebar brand mark and
+     active nav pill, where a bold solid fill reads better than the mid-tone
+     indigo used for buttons elsewhere. */
+  --sidebar-accent: #1e2875;
+  --sidebar-accent-foreground: #ffffff;
+
+  --status-todo-bg: #f1f5f9;
+  --status-todo-fg: #475569;
+  --status-progress-bg: #fef3c7;
+  --status-progress-fg: #92400e;
+  --status-review-bg: #dbeafe;
+  --status-review-fg: #1d4ed8;
+  --status-done-bg: #dcfce7;
+  --status-done-fg: #166534;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1120;
+    --foreground: #e2e8f0;
+    --surface: #131b2e;
+    --border: #253150;
+    --muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-foreground: #ffffff;
+    --danger: #f87171;
+
+    /* Brighter than the light-mode navy so the active pill still stands out
+       against the already-dark --surface. */
+    --sidebar-accent: #3b46a3;
+    --sidebar-accent-foreground: #ffffff;
+
+    --status-todo-bg: #1e293b;
+    --status-todo-fg: #cbd5e1;
+    --status-progress-bg: #422006;
+    --status-progress-fg: #fcd34d;
+    --status-review-bg: #1e3a8a;
+    --status-review-fg: #bfdbfe;
+    --status-done-bg: #052e16;
+    --status-done-fg: #86efac;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Unlike <a>, browsers don't give <button> a pointer cursor by default -
+   without this every button in the app (Tailwind's preflight reset doesn't
+   add it either) shows the plain arrow on hover. Disabled buttons get
+   not-allowed instead, since they're not actually clickable. */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }

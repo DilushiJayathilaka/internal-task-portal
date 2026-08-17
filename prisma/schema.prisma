@@ -1,0 +1,107 @@
+// Prisma schema for the Internal Task Portal.
+//
+// Data model decisions (see README.md "Key decisions" for full rationale):
+// - Task.ownerId (creator) and Task.assigneeId (doer) are distinct. The
+//   owner retains edit/delete/reassign rights; the assignee is who does the
+//   work and uploads evidence. They may be the same person or different
+//   people - this split is what makes admin review meaningful (the admin is
+//   checking the assignee's work, which the owner may have delegated).
+// - Role is USER/ADMIN. Only an ADMIN can approve/request-changes on
+//   evidence, enforced in the Route Handlers, not just hidden in the UI.
+// - TaskStatus adds EVIDENCE_SUBMITTED between IN_PROGRESS and DONE.
+//   Rejected evidence sends the task back to IN_PROGRESS (with reviewNote
+//   explaining why) rather than a separate "rejected" terminal state - this
+//   was the documented assumption in Task_2.pdf and keeps the state machine
+//   small: the task is still actionable work, not truly rejected.
+// - Evidence files live in Vercel Blob, not in Postgres: TaskEvidence stores
+//   metadata + the blob URL, not the file bytes. Keeps structured data
+//   (Postgres) and binary storage (Blob) as separate concerns instead of
+//   bloating the database with file contents.
+// - Indexes on ownerId/assigneeId/status support the filter-by-status-and-
+//   assignee requirement.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  EVIDENCE_SUBMITTED
+  DONE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+
+  ownedTasks       Task[]         @relation("TaskOwner")
+  assignedTasks    Task[]         @relation("TaskAssignee")
+  approvedTasks    Task[]         @relation("TaskApprover")
+  uploadedEvidence TaskEvidence[] @relation("EvidenceUploader")
+
+  @@map("users")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  owner   User   @relation("TaskOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+
+  assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  assigneeId String?
+
+  // Set when an ADMIN approves submitted evidence (status -> DONE).
+  approvedBy   User?     @relation("TaskApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedById String?
+  approvedAt   DateTime?
+
+  // Latest admin comment when evidence is sent back for changes. Cleared on
+  // the next evidence submission.
+  reviewNote String?
+
+  evidence TaskEvidence[]
+
+  @@index([ownerId])
+  @@index([assigneeId])
+  @@index([status])
+  @@map("tasks")
+}
+
+model TaskEvidence {
+  id       String @id @default(cuid())
+  task     Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId   String
+
+  fileName String
+  mimeType String
+  fileSize Int
+  blobUrl  String
+
+  uploadedBy   User     @relation("EvidenceUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  @@index([taskId])
+  @@map("task_evidence")
+}
